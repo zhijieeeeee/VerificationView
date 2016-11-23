@@ -1,6 +1,7 @@
 package com.don.verificationviewlibrary;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -85,6 +86,12 @@ public class VerificationView extends View {
 
     private Random random = new Random();
 
+    /**
+     * 绘制验证码的画布
+     */
+    private Bitmap mBitmap;
+    private Canvas mCanvas;
+
     public VerificationView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
@@ -125,17 +132,26 @@ public class VerificationView extends View {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        mBitmap = Bitmap.createBitmap(getMeasuredWidth(), getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+        mCanvas = new Canvas(mBitmap);
+        drawCode();
+    }
+
+    /**
+     * 绘制验证码
+     */
+    private void drawCode() {
         //绘制背景
-        canvas.drawColor(BG_COLOR);
+        mCanvas.drawColor(BG_COLOR);
 
         mPaint.setColor(CIRCLE_COLOR);
         //绘制随机圆点
         for (int i = 0; i < POINT_NUM; i++) {
             int radius = random.nextInt(8);
             int[] points = randomPoints();
-            canvas.drawCircle(points[0], points[1], radius, mPaint);
+            mCanvas.drawCircle(points[0], points[1], radius, mPaint);
         }
 
         //绘制随机线
@@ -147,7 +163,7 @@ public class VerificationView extends View {
                 mPaint.setColor(randomColor());
             }
             int[] lines = randomLines();
-            canvas.drawLine(lines[0], lines[1], lines[2], lines[3], mPaint);
+            mCanvas.drawLine(lines[0], lines[1], lines[2], lines[3], mPaint);
         }
 
         //数字之间的间隙
@@ -160,9 +176,14 @@ public class VerificationView extends View {
                 mPaint.setColor(randomColor());
             }
             int x = textGap * (i + 1) + textBounds.width() / 4 * i;
-            canvas.drawText(texts[i], x, randomY(), mPaint);
+            mCanvas.drawText(texts[i], x, randomY(), mPaint);
         }
+    }
 
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        canvas.drawBitmap(mBitmap, 0, 0, null);
     }
 
     /**
@@ -234,6 +255,7 @@ public class VerificationView extends View {
      */
     public void reset() {
         randomText();
+        drawCode();
         invalidate();
     }
 

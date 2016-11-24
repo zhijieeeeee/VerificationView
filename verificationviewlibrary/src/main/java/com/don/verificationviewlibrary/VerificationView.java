@@ -190,7 +190,9 @@ public class VerificationView extends View {
      * 随机生成数字的Y坐标
      */
     private int randomY() {
-        int y = (int) ((getMeasuredHeight() / 2 + textBounds.height()) * random.nextFloat());
+        //字体的baseline始终在控件底部之上
+        int y = (int) (getMeasuredHeight() * random.nextFloat());
+        //字体的baseline不低于字体高度，始终在控件顶部之下
         if (y < textBounds.height()) {
             y = textBounds.height();
         }
